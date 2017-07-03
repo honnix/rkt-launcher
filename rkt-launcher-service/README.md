@@ -81,6 +81,7 @@ For details of `rkt` command, please check `rkt -h`.
 
 TBA.
 
+[Apollo]: https://github.com/spotify/apollo
 [rkt]: https://coreos.com/rkt/
 [logback]: https://logback.qos.ch
 [GlobalOptions.java]: ../rkt-launcher-common/src/main/java/io/honnix/rkt/launcher/options/GlobalOptions.java
