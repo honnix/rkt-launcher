@@ -14,6 +14,10 @@
   <artifactId>rkt-launcher-service</artifactId>
   <packaging>jar</packaging>
 
+  <properties>
+    <service.main>io.honnix.rkt.launcher.service.RktLauncherService</service.main>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -90,7 +94,7 @@
               <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
               <addClasspath>true</addClasspath>
               <classpathPrefix>lib/</classpathPrefix>
-              <mainClass>io.honnix.rkt.launcher.service.RktLauncherService</mainClass>
+              <mainClass>${service.main}</mainClass>
             </manifest>
             <manifestEntries>
               <X-Spotify-Apollo-Version>${apollo.version}</X-Spotify-Apollo-Version>
