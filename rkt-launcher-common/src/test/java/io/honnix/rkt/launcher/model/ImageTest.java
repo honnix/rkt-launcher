@@ -1,8 +1,8 @@
 /*-
  * -\-\-
- * rkt-launcher
+ * Spotify rkt-launcher
  * --
- * 
+ * Copyright (C) 2017 Spotify AB
  * --
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,36 +17,19 @@
  * limitations under the License.
  * -/-/-
  */
-package io.honnix.rkt.launcher.options;
+package io.honnix.rkt.launcher.model;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
-import org.junit.Before;
+import java.time.Instant;
 import org.junit.Test;
 
-public class OptionsTest {
-
-  private Options options;
-
-  @Before
-  public void setUp() {
-    options = new Options() {
-    };
-  }
-
-  @Test(expected = UnsupportedOperationException.class)
-  public void shouldThrow() {
-    options.asList();
-  }
-  
-  @Test
-  public void shouldReturnEmptyList() {
-    assertTrue(Options.NULL.asList().isEmpty());
-  }
+public class ImageTest {
 
   @Test
-  public void shouldJoin() {
-    assertEquals("a=b", options.join("a", "b"));
+  public void shouldConvert() {
+    final Long nano = 1491859470078086852L;
+    final Instant instant = new Image.Nano2Instant().convert(nano);
+    assertEquals(nano, new Image.Instant2Nano().convert(instant));
   }
 }
