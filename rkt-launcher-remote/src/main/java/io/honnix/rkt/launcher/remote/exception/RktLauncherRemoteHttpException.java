@@ -19,6 +19,9 @@
  */
 package io.honnix.rkt.launcher.remote.exception;
 
+/**
+ * This exception captures all non-200 HTTP status code and message.
+ */
 public class RktLauncherRemoteHttpException extends RuntimeException {
 
   private int code;
@@ -28,6 +31,11 @@ public class RktLauncherRemoteHttpException extends RuntimeException {
     this.code = code;
   }
 
+  /**
+   * Get HTTP status code.
+   *
+   * @return the HTTP status code
+   */
   public int getCode() {
     return code;
   }

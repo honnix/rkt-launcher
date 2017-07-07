@@ -25,8 +25,6 @@ strings for which regex is used to interpret in a best effort way.
 
 ### Setup
 
-NOT yet in Maven central.
-
 ```xml
 <dependency>
   <groupId>io.honnix</groupId>

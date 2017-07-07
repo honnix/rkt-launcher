@@ -6,8 +6,6 @@ A client library talking to `rkt-launcher-service` remotely.
 
 ### Setup
 
-NOT yet in Maven central.
-
 ```xml
 <dependency>
   <groupId>io.honnix</groupId>

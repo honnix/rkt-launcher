@@ -19,6 +19,7 @@
  */
 package io.honnix.rkt.launcher.remote;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.spotify.apollo.Client;
 import io.honnix.rkt.launcher.options.FetchOptions;
 import io.honnix.rkt.launcher.options.GcOptions;
@@ -52,11 +53,12 @@ class RktLauncherRemoteImpl implements RktLauncherRemote {
 
   private final RktImageCommandRemote rktImageCommandRemote;
 
-  RktLauncherRemoteImpl(final URI uri, final Client client) {
+  public RktLauncherRemoteImpl(final URI uri, final Client client) {
     rktCommandRemote = new RktCommandRemoteImpl(uri, client);
     rktImageCommandRemote = new RktImageCommandRemoteImpl(uri, client);
   }
 
+  @VisibleForTesting
   RktLauncherRemoteImpl(final RktCommandRemote rktCommandRemote,
                         final RktImageCommandRemote rktImageCommandRemote) {
     this.rktCommandRemote = Objects.requireNonNull(rktCommandRemote);

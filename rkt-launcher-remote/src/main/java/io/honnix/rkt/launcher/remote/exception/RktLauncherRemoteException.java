@@ -19,8 +19,11 @@
  */
 package io.honnix.rkt.launcher.remote.exception;
 
+/**
+ * This exception represents runtime exception the client might get, e.g. JSON serialization
+ * and deserialization error, unexpected payload received from server.
+ */
 public class RktLauncherRemoteException extends RuntimeException {
-
 
   public RktLauncherRemoteException(final String message) {
     super(message);

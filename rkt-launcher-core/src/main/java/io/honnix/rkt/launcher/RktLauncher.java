@@ -19,6 +19,7 @@
  */
 package io.honnix.rkt.launcher;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import io.honnix.rkt.launcher.command.Command;
 import io.honnix.rkt.launcher.command.Daemonizable;
@@ -53,9 +54,7 @@ public class RktLauncher {
     this(rktLauncherConfig, DEFAULT_PROCESS_EXECUTOR_SUPPLIER);
   }
 
-  /**
-   * Used by unit test.
-   */
+  @VisibleForTesting
   RktLauncher(final RktLauncherConfig rktLauncherConfig,
               final Supplier<ProcessExecutor> processExecutorSupplier) {
     this.rktLauncherConfig = Objects.requireNonNull(rktLauncherConfig);
@@ -66,8 +65,8 @@ public class RktLauncher {
    * Run <code>rkt</code> command.
    *
    * @param command the <code>rkt</code> command
-   * @param <T>     type of the command options
-   * @param <S>     type of the command output
+   * @param <T>     the type of the command options
+   * @param <S>     the type of the command output
    * @return the command output
    * @throws RktLauncherException if failed to fork <code>rkt</code> process for any reason
    * @throws RktException         if <code>rkt</code> returns exit code other than <code>0</code>

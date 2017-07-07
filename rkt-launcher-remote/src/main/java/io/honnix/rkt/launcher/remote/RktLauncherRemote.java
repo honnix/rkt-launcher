@@ -24,6 +24,9 @@ import io.honnix.rkt.launcher.remote.command.RktCommandRemote;
 import io.honnix.rkt.launcher.remote.command.RktImageCommandRemote;
 import java.net.URI;
 
+/**
+ * Talking remotely to rkt-launcher-service.
+ */
 public interface RktLauncherRemote extends RktCommandRemote {
 
   class RktLauncherRemoteBuilder {
@@ -41,21 +44,41 @@ public interface RktLauncherRemote extends RktCommandRemote {
 
     private Client client;
 
+    /**
+     * Set URI scheme: {@link Scheme#HTTP} or {@link Scheme#HTTPS}
+     *
+     * @param scheme the URI scheme
+     */
     public RktLauncherRemoteBuilder scheme(final Scheme scheme) {
       this.scheme = scheme;
       return this;
     }
 
+    /**
+     * Set host where the service is running
+     *
+     * @param host the host where the service is running
+     */
     public RktLauncherRemoteBuilder host(final String host) {
       this.host = host;
       return this;
     }
 
+    /**
+     * Set port where the service is listening
+     *
+     * @param port the port where the service is listening
+     */
     public RktLauncherRemoteBuilder port(final int port) {
       this.port = port;
       return this;
     }
 
+    /**
+     * Set HTTP client
+     *
+     * @param client the HTTP client
+     */
     public RktLauncherRemoteBuilder client(final Client client) {
       this.client = client;
       return this;
@@ -72,5 +95,10 @@ public interface RktLauncherRemote extends RktCommandRemote {
     return new RktLauncherRemoteBuilder();
   }
 
+  /**
+   * Get access to image related commands remote. Check <code>rkt image -h</code> for details.
+   *
+   * @return the imaged related commands remote
+   */
   RktImageCommandRemote image();
 }

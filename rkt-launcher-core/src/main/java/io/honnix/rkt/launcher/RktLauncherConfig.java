@@ -33,7 +33,7 @@ public interface RktLauncherConfig {
   /**
    * The path to rkt executable. By default {@link RktLauncher} uses <code>rkt</code>.
    *
-   * @return path to rkt executable
+   * @return the path to rkt executable
    */
   Optional<String> rkt();
 
@@ -48,15 +48,10 @@ public interface RktLauncherConfig {
   /**
    * Global options. <code>rkt -h</code> will give a list of available global options.
    *
-   * @return global options
+   * @return the global options
    */
   Optional<GlobalOptions> globalOptions();
 
-  /**
-   * RktLauncherConfig builder.
-   *
-   * @return RktLauncherConfigBuilder
-   */
   static RktLauncherConfigBuilder builder() {
     return new RktLauncherConfigBuilder();
   }

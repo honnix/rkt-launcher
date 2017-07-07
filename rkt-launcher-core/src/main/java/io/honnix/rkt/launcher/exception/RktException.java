@@ -35,7 +35,7 @@ public class RktException extends Exception {
   /**
    * Get <code>rkt</code> exit code.
    *
-   * @return <code>rkt</code> exit code
+   * @return the <code>rkt</code> exit code
    */
   public int getExitCode() {
     return exitCode;
