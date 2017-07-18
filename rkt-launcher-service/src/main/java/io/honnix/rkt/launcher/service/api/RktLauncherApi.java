@@ -19,16 +19,22 @@
  */
 package io.honnix.rkt.launcher.service.api;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.spotify.apollo.AppInit;
 import com.spotify.apollo.Environment;
 import com.spotify.apollo.route.Route;
+import com.typesafe.config.ConfigRenderOptions;
 import io.honnix.rkt.launcher.RktLauncherConfig;
 import io.honnix.rkt.launcher.service.exception.RktLauncherServiceException;
 import io.honnix.rkt.launcher.util.Json;
-import com.typesafe.config.ConfigRenderOptions;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 public final class RktLauncherApi implements AppInit {
+
+  private static final int ASYNC_COMMAND_EXECUTOR_THREADS = 4;
 
   @Override
   public void create(final Environment environment) {
@@ -41,7 +47,15 @@ public final class RktLauncherApi implements AppInit {
       throw new RktLauncherServiceException("invalid configuration", e);
     }
 
-    final RktCommandResource rktCommandResource = new RktCommandResource(rktLauncherConfig);
+    final ThreadFactory threadFactory = new ThreadFactoryBuilder()
+        .setDaemon(true)
+        .setNameFormat("async-command-executor-thread-%d")
+        .build();
+    final ExecutorService asyncCommandExecutorService =
+        Executors.newFixedThreadPool(ASYNC_COMMAND_EXECUTOR_THREADS, threadFactory);
+
+    final RktCommandResource rktCommandResource =
+        new RktCommandResource(rktLauncherConfig, asyncCommandExecutorService);
     final RktImageCommandResource rktImageCommandResource =
         new RktImageCommandResource(rktLauncherConfig);
 

@@ -45,10 +45,13 @@ public interface RktCommandRemote {
 
   CompletionStage<ConfigOutput> config();
 
-  CompletionStage<FetchOutput> fetch(final FetchOptions options, final String image,
+  CompletionStage<FetchOutput> fetch(final FetchOptions options, final boolean async,
+                                     final String image,
                                      final String... images);
 
-  CompletionStage<FetchOutput> fetch(final String image, final String... images);
+  CompletionStage<FetchOutput> fetch(final boolean async,
+                                     final String image,
+                                     final String... images);
 
   CompletionStage<GcOutput> gc(final GcOptions options);
 
@@ -56,7 +59,7 @@ public interface RktCommandRemote {
 
   CompletionStage<ListOutput> list();
 
-  CompletionStage<PrepareOutput> prepare(final PrepareOptions options);
+  CompletionStage<PrepareOutput> prepare(final PrepareOptions options, final boolean async);
 
   CompletionStage<RmOutput> rm(final String id, final String... ids);
 
