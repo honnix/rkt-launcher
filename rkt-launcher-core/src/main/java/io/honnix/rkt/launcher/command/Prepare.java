@@ -38,7 +38,10 @@ public interface Prepare extends CommandWithoutArgs<PrepareOptions, PrepareOutpu
 
   @Override
   default PrepareOutput parse(final String output) {
-    return PrepareOutput.builder().prepared(output).build();
+    final String trimmed = output.trim();
+    return PrepareOutput.builder()
+        .prepared(trimmed.substring(trimmed.lastIndexOf('\n') + 1))
+        .build();
   }
 
   static PrepareBuilder builder() {
