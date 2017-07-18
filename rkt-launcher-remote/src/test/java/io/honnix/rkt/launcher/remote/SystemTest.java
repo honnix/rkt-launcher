@@ -251,12 +251,13 @@ public class SystemTest {
     final Response<ByteString> responsePayload =
         Response.forPayload(ByteString.of(Json.serialize(output)));
     when(client.send(
-        Request.forUri("http://localhost:8080/api/v0/rkt/fetch?image=image1&image=image2",
-                       DEFAULT_HTTP_METHOD)
+        Request.forUri(
+            "http://localhost:8080/api/v0/rkt/fetch?async=true&image=image1&image=image2",
+            DEFAULT_HTTP_METHOD)
             .withPayload(ByteString.of(Json.serialize(options)))))
         .thenReturn(CompletableFuture.completedFuture(responsePayload));
     final FetchOutput response =
-        rktLauncherRemote.fetch(options, "image1", "image2").toCompletableFuture().get();
+        rktLauncherRemote.fetch(options, true, "image1", "image2").toCompletableFuture().get();
     assertEquals(output, response);
   }
 
@@ -269,11 +270,12 @@ public class SystemTest {
     final Response<ByteString> responsePayload =
         Response.forPayload(ByteString.of(Json.serialize(output)));
     when(client.send(
-        Request.forUri("http://localhost:8080/api/v0/rkt/fetch?image=image1&image=image2",
-                       DEFAULT_HTTP_METHOD)))
+        Request.forUri(
+            "http://localhost:8080/api/v0/rkt/fetch?async=false&image=image1&image=image2",
+            DEFAULT_HTTP_METHOD)))
         .thenReturn(CompletableFuture.completedFuture(responsePayload));
     final FetchOutput response =
-        rktLauncherRemote.fetch("image1", "image2").toCompletableFuture().get();
+        rktLauncherRemote.fetch(false, "image1", "image2").toCompletableFuture().get();
     assertEquals(output, response);
   }
 
@@ -349,12 +351,12 @@ public class SystemTest {
     final Response<ByteString> responsePayload =
         Response.forPayload(ByteString.of(Json.serialize(output)));
     when(client.send(
-        Request.forUri("http://localhost:8080/api/v0/rkt/prepare",
+        Request.forUri("http://localhost:8080/api/v0/rkt/prepare?async=true",
                        DEFAULT_HTTP_METHOD)
             .withPayload(ByteString.of(Json.serialize(options)))))
         .thenReturn(CompletableFuture.completedFuture(responsePayload));
     final PrepareOutput response =
-        rktLauncherRemote.prepare(options).toCompletableFuture().get();
+        rktLauncherRemote.prepare(options, true).toCompletableFuture().get();
     assertEquals(output, response);
   }
 

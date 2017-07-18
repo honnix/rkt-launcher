@@ -56,7 +56,14 @@ public class PrepareTest {
 
   @Test
   public void shouldParseOutput() {
-    PrepareOutput prepareOutput = prepare.parse("6c8158de-e3f0-46af-9100-88591c17d302");
+    final PrepareOutput prepareOutput = prepare.parse("6c8158de-e3f0-46af-9100-88591c17d302\n");
+    assertEquals("6c8158de-e3f0-46af-9100-88591c17d302", prepareOutput.prepared());
+  }
+
+  @Test
+  public void shouldParseOutputWithGarbage() {
+    final PrepareOutput prepareOutput =
+        prepare.parse("some random garbage\n6c8158de-e3f0-46af-9100-88591c17d302\n");
     assertEquals("6c8158de-e3f0-46af-9100-88591c17d302", prepareOutput.prepared());
   }
 }

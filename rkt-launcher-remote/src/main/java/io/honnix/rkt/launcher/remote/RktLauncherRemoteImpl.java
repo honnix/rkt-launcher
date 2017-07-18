@@ -81,14 +81,18 @@ class RktLauncherRemoteImpl implements RktLauncherRemote {
   }
 
   @Override
-  public CompletionStage<FetchOutput> fetch(final FetchOptions options, final String image,
+  public CompletionStage<FetchOutput> fetch(final FetchOptions options,
+                                            final boolean async,
+                                            final String image,
                                             final String... images) {
-    return rktCommandRemote.fetch(options, image, images);
+    return rktCommandRemote.fetch(options, async, image, images);
   }
 
   @Override
-  public CompletionStage<FetchOutput> fetch(final String image, final String... images) {
-    return rktCommandRemote.fetch(image, images);
+  public CompletionStage<FetchOutput> fetch(final boolean async,
+                                            final String image,
+                                            final String... images) {
+    return rktCommandRemote.fetch(async, image, images);
   }
 
   @Override
@@ -107,8 +111,8 @@ class RktLauncherRemoteImpl implements RktLauncherRemote {
   }
 
   @Override
-  public CompletionStage<PrepareOutput> prepare(final PrepareOptions options) {
-    return rktCommandRemote.prepare(options);
+  public CompletionStage<PrepareOutput> prepare(final PrepareOptions options, final boolean async) {
+    return rktCommandRemote.prepare(options, async);
   }
 
   @Override

@@ -19,9 +19,6 @@
  */
 package io.honnix.rkt.launcher.remote.command;
 
-import static io.honnix.rkt.launcher.remote.command.RktCommandHelper.sendRequest;
-import static io.honnix.rkt.launcher.remote.command.RktCommandHelper.uri;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.spotify.apollo.Client;
@@ -73,25 +70,31 @@ public class RktCommandRemoteImpl implements RktCommandRemote {
   }
 
   @Override
-  public CompletionStage<FetchOutput> fetch(final FetchOptions options, final String image,
+  public CompletionStage<FetchOutput> fetch(final FetchOptions options,
+                                            final boolean async,
+                                            final String image,
                                             final String... images) {
-    return RktCommandHelper.sendRequest(client,
-                                        RktCommandHelper.uri(apiHost,
-                                                             ImmutableMap.of("image", RktCommandHelper
-                                                                 .merge(image, images)),
-                                                             "fetch"),
-                                        options,
-                                        FetchOutput.class);
+    return RktCommandHelper.sendRequest(
+        client,
+        RktCommandHelper.uri(apiHost,
+                             ImmutableMap.of("async", ImmutableList.of(Boolean.toString(async)),
+                                             "image", RktCommandHelper.merge(image, images)),
+                             "fetch"),
+        options,
+        FetchOutput.class);
   }
 
   @Override
-  public CompletionStage<FetchOutput> fetch(final String image, String... images) {
-    return RktCommandHelper.sendRequest(client,
-                                        RktCommandHelper.uri(apiHost,
-                                                             ImmutableMap.of("image", RktCommandHelper
-                                                                 .merge(image, images)),
-                                                             "fetch"),
-                                        FetchOutput.class);
+  public CompletionStage<FetchOutput> fetch(final boolean async,
+                                            final String image,
+                                            String... images) {
+    return RktCommandHelper.sendRequest(
+        client,
+        RktCommandHelper.uri(apiHost,
+                             ImmutableMap.of("async", ImmutableList.of(Boolean.toString(async)),
+                                             "image", RktCommandHelper.merge(image, images)),
+                             "fetch"),
+        FetchOutput.class);
   }
 
   @Override
@@ -117,11 +120,14 @@ public class RktCommandRemoteImpl implements RktCommandRemote {
   }
 
   @Override
-  public CompletionStage<PrepareOutput> prepare(final PrepareOptions options) {
-    return RktCommandHelper.sendRequest(client,
-                                        RktCommandHelper.uri(apiHost, "prepare"),
-                                        options,
-                                        PrepareOutput.class);
+  public CompletionStage<PrepareOutput> prepare(final PrepareOptions options, final boolean async) {
+    return RktCommandHelper.sendRequest(
+        client,
+        RktCommandHelper.uri(apiHost,
+                             ImmutableMap.of("async", ImmutableList.of(Boolean.toString(async))),
+                             "prepare"),
+        options,
+        PrepareOutput.class);
   }
 
   @Override
@@ -138,7 +144,9 @@ public class RktCommandRemoteImpl implements RktCommandRemote {
   public CompletionStage<RunOutput> run(final RunOptions options, boolean daemonize) {
     return RktCommandHelper.sendRequest(client,
                                         RktCommandHelper.uri(apiHost, ImmutableMap
-                           .of("daemonize", ImmutableList.of(Boolean.toString(daemonize))), "run"),
+                                                                 .of("daemonize",
+                                                                     ImmutableList.of(Boolean.toString(daemonize))),
+                                                             "run"),
                                         options,
                                         RunOutput.class);
   }
@@ -148,7 +156,8 @@ public class RktCommandRemoteImpl implements RktCommandRemote {
                                                 boolean daemonize) {
     return RktCommandHelper.sendRequest(client,
                                         RktCommandHelper.uri(apiHost, ImmutableMap
-                               .of("daemonize", ImmutableList.of(Boolean.toString(daemonize))),
+                                                                 .of("daemonize",
+                                                                     ImmutableList.of(Boolean.toString(daemonize))),
                                                              "run-prepared", id),
                                         options,
                                         RunOutput.class);
@@ -158,7 +167,8 @@ public class RktCommandRemoteImpl implements RktCommandRemote {
   public CompletionStage<RunOutput> runPrepared(String id, boolean daemonize) {
     return RktCommandHelper.sendRequest(client,
                                         RktCommandHelper.uri(apiHost, ImmutableMap
-                               .of("daemonize", ImmutableList.of(Boolean.toString(daemonize))),
+                                                                 .of("daemonize",
+                                                                     ImmutableList.of(Boolean.toString(daemonize))),
                                                              "run-prepared", id),
                                         RunOutput.class);
   }

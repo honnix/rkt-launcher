@@ -21,10 +21,15 @@ package io.honnix.rkt.launcher.service.api;
 
 import static com.spotify.apollo.test.unit.ResponseMatchers.hasStatus;
 import static com.spotify.apollo.test.unit.StatusTypeMatchers.belongsToFamily;
+import static com.spotify.apollo.test.unit.StatusTypeMatchers.withCode;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
@@ -42,8 +47,8 @@ import io.honnix.rkt.launcher.command.Prepare;
 import io.honnix.rkt.launcher.command.Rm;
 import io.honnix.rkt.launcher.command.Run;
 import io.honnix.rkt.launcher.command.RunPrepared;
-import io.honnix.rkt.launcher.command.Stop;
 import io.honnix.rkt.launcher.command.Status;
+import io.honnix.rkt.launcher.command.Stop;
 import io.honnix.rkt.launcher.command.Version;
 import io.honnix.rkt.launcher.exception.RktException;
 import io.honnix.rkt.launcher.exception.RktLauncherException;
@@ -78,6 +83,8 @@ import io.honnix.rkt.launcher.output.VersionOutput;
 import io.honnix.rkt.launcher.util.Json;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 import okio.ByteString;
 import org.junit.Assert;
@@ -89,6 +96,8 @@ public class RktCommandResourceTest extends VersionedApiTest {
 
   private RktLauncher rktLauncher;
 
+  private ExecutorService executorService;
+
   public RktCommandResourceTest(final Api.Version version) {
     super("/rkt", version, "rkt-command-resource-test");
   }
@@ -96,11 +105,13 @@ public class RktCommandResourceTest extends VersionedApiTest {
   @Override
   protected void init(final Environment environment) {
     rktLauncher = mock(RktLauncher.class);
+    executorService = spy(Executors.newCachedThreadPool());
     final Function<RktLauncherConfig, RktLauncher> rktLauncherFactory =
         (rktLauncherConfig) -> rktLauncher;
     environment.routingEngine()
         .registerRoutes(new RktCommandResource(RktLauncherConfig.builder().build(),
-                                               rktLauncherFactory).routes());
+                                               rktLauncherFactory,
+                                               executorService).routes());
   }
 
   @Test
@@ -162,7 +173,8 @@ public class RktCommandResourceTest extends VersionedApiTest {
     assertThat(response, hasStatus(belongsToFamily(StatusType.Family.SUCCESSFUL)));
     assertTrue(response.payload().isPresent());
     Assert.assertEquals(catManifestOutput,
-                        Json.deserialize(response.payload().get().toByteArray(), CatManifestOutput.class));
+                        Json.deserialize(response.payload().get().toByteArray(),
+                                         CatManifestOutput.class));
   }
 
   @Test
@@ -283,6 +295,66 @@ public class RktCommandResourceTest extends VersionedApiTest {
   }
 
   @Test
+  public void shouldRunFetchAsync() throws Exception {
+    sinceVersion(Api.Version.V0);
+    final Response<ByteString> response = awaitResponse(
+        serviceHelper.request(DEFAULT_HTTP_METHOD, path(
+            "/fetch?async=true&image=image1&image=image2"), ByteString.of()));
+    assertThat(response, hasStatus(withCode(com.spotify.apollo.Status.ACCEPTED)));
+    assertFalse(response.payload().isPresent());
+    verify(executorService).submit(any(Runnable.class));
+  }
+
+  @Test
+  public void shouldRunFetchAsyncThrowRktLauncherException() throws Exception {
+    sinceVersion(Api.Version.V0);
+    final Fetch fetch = Fetch.builder()
+        .addArg("image1")
+        .addArg("image2")
+        .build();
+    when(rktLauncher.run(fetch))
+        .thenThrow(new RktLauncherException("error", new IOException()));
+    final Response<ByteString> response = awaitResponse(
+        serviceHelper.request(DEFAULT_HTTP_METHOD, path(
+            "/fetch?async=true&image=image1&image=image2"), ByteString.of()));
+    assertThat(response, hasStatus(withCode(com.spotify.apollo.Status.ACCEPTED)));
+    assertFalse(response.payload().isPresent());
+    verify(executorService).submit(any(Runnable.class));
+  }
+
+  @Test
+  public void shouldRunFetchAsyncThrowRktException() throws Exception {
+    sinceVersion(Api.Version.V0);
+    final Fetch fetch = Fetch.builder()
+        .addArg("image1")
+        .addArg("image2")
+        .build();
+    when(rktLauncher.run(fetch)).thenThrow(new RktException(254, "error"));
+    final Response<ByteString> response = awaitResponse(
+        serviceHelper.request(DEFAULT_HTTP_METHOD, path(
+            "/fetch?async=true&image=image1&image=image2"), ByteString.of()));
+    assertThat(response, hasStatus(withCode(com.spotify.apollo.Status.ACCEPTED)));
+    assertFalse(response.payload().isPresent());
+    verify(executorService).submit(any(Runnable.class));
+  }
+
+  @Test
+  public void shouldRunFetchAsyncThrowRktUnexpectedOutputException() throws Exception {
+    sinceVersion(Api.Version.V0);
+    final Fetch fetch = Fetch.builder()
+        .addArg("image1")
+        .addArg("image2")
+        .build();
+    when(rktLauncher.run(fetch)).thenThrow(new RktUnexpectedOutputException("forced error"));
+    final Response<ByteString> response = awaitResponse(
+        serviceHelper.request(DEFAULT_HTTP_METHOD, path(
+            "/fetch?async=true&image=image1&image=image2"), ByteString.of()));
+    assertThat(response, hasStatus(withCode(com.spotify.apollo.Status.ACCEPTED)));
+    assertFalse(response.payload().isPresent());
+    verify(executorService).submit(any(Runnable.class));
+  }
+
+  @Test
   public void shouldRunGcWithPayload() throws Exception {
     sinceVersion(Api.Version.V0);
     final GcOptions options = GcOptions.builder()
@@ -379,6 +451,21 @@ public class RktCommandResourceTest extends VersionedApiTest {
     assertTrue(response.payload().isPresent());
     assertEquals(prepareOutput,
                  Json.deserialize(response.payload().get().toByteArray(), PrepareOutput.class));
+  }
+
+  @Test
+  public void shouldRunAsync() throws Exception {
+    sinceVersion(Api.Version.V0);
+    final PrepareOptions options = PrepareOptions.builder()
+        .addImagesOption(PerImageOptions.builder().image("docker://nginx").build())
+        .addImagesOption(PerImageOptions.builder().image("docker://mysql").build())
+        .build();
+    final Response<ByteString> response = awaitResponse(
+        serviceHelper.request(DEFAULT_HTTP_METHOD, path("/prepare?async=true"),
+                              ByteString.of(Json.serialize(options))));
+    assertThat(response, hasStatus(withCode(com.spotify.apollo.Status.ACCEPTED)));
+    assertFalse(response.payload().isPresent());
+    verify(executorService).submit(any(Runnable.class));
   }
 
   @Test
