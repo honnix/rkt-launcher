@@ -20,6 +20,7 @@
 package io.honnix.rkt.launcher.command.image;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.collect.ImmutableList;
 import io.honnix.rkt.launcher.command.CommandWithoutArgs;
 import io.honnix.rkt.launcher.exception.RktUnexpectedOutputException;
 import io.honnix.rkt.launcher.options.image.ListOptions;
@@ -49,7 +50,7 @@ public interface List extends CommandWithoutArgs<ListOptions, ListOutput> {
               new TypeReference<java.util.List<io.honnix.rkt.launcher.model.Image>>() {
               });
       return ListOutput.builder()
-          .images(images)
+          .images(images == null ? ImmutableList.of() : images)
           .build();
     } catch (IOException e) {
       throw new RktUnexpectedOutputException("failed parsing JSON output", e);

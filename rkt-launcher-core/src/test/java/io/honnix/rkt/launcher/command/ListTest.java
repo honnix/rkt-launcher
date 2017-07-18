@@ -96,6 +96,15 @@ public class ListTest {
     assertEquals(2, pods.size());
   }
 
+  @Test
+  public void shouldParseOutputWhenThereIsNoPod() {
+    //language=JSON
+    final String json = "null";
+
+    final java.util.List<Pod> pods = list.parse(json).pods();
+    assertEquals(0, pods.size());
+  }
+
   @Test(expected = RktUnexpectedOutputException.class)
   public void shouldThrowWhenInvalidJson() {
     list.parse("[not_a_json");

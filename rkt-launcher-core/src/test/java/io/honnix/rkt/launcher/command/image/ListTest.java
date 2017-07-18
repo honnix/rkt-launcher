@@ -93,6 +93,15 @@ public class ListTest {
     final java.util.List<Image> images = list.parse(json).images();
     assertEquals(4, images.size());
   }
+
+  @Test
+  public void shouldParseOutputWhenThereIsNoImage() {
+    //language=JSON
+    final String json = "null";
+
+    final java.util.List<Image> images = list.parse(json).images();
+    assertEquals(0, images.size());
+  }
   
   @Test
   public void shouldSerializeToNano() throws JsonProcessingException {
