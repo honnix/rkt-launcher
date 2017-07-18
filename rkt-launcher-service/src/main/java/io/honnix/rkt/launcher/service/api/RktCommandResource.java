@@ -74,6 +74,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import okio.ByteString;
@@ -91,16 +92,21 @@ final class RktCommandResource {
 
   private final RktLauncherConfig rktLauncherConfig;
 
+  private final ExecutorService asyncCommandExecutorService;
+
   private Function<RktLauncherConfig, RktLauncher> rktLauncherFactory;
 
-  RktCommandResource(final RktLauncherConfig rktLauncherConfig) {
-    this(rktLauncherConfig, DEFAULT_RKT_LAUNCHER_FACTORY);
+  RktCommandResource(final RktLauncherConfig rktLauncherConfig,
+                     final ExecutorService asyncCommandExecutorService) {
+    this(rktLauncherConfig, DEFAULT_RKT_LAUNCHER_FACTORY, asyncCommandExecutorService);
   }
 
   RktCommandResource(final RktLauncherConfig rktLauncherConfig,
-                     final Function<RktLauncherConfig, RktLauncher> rktLauncherFactory) {
+                     final Function<RktLauncherConfig, RktLauncher> rktLauncherFactory,
+                     final ExecutorService asyncCommandExecutorService) {
     this.rktLauncherConfig = Objects.requireNonNull(rktLauncherConfig);
     this.rktLauncherFactory = Objects.requireNonNull(rktLauncherFactory);
+    this.asyncCommandExecutorService = asyncCommandExecutorService;
   }
 
   Stream<? extends Route<? extends AsyncHandler<? extends Response<ByteString>>>> routes() {
@@ -133,7 +139,7 @@ final class RktCommandResource {
         Route.with(
             em.response(PrepareOptions.class, PrepareOutput.class),
             DEFAULT_HTTP_METHOD, base + "/prepare",
-            rc -> this::prepare),
+            rc -> payload -> prepare(payload, rc.request())),
         Route.with(
             em.serializerResponse(RmOutput.class),
             DEFAULT_HTTP_METHOD, base + "/rm",
@@ -204,6 +210,22 @@ final class RktCommandResource {
     }
   }
 
+  private <T extends Options, S extends Output> void submitCommand(
+      final Command<T, S> command) {
+    asyncCommandExecutorService.submit(() -> {
+      try {
+        rktLauncherFactory.apply(rktLauncherConfig).run(command);
+      } catch (RktLauncherException e) {
+        LOG.error("unable to execute command [{}]]", command, e);
+      } catch (RktException e) {
+        LOG.debug("non zero exit code [{}] received from rkt when executing command [{}]]",
+                  e.getExitCode(), command, e);
+      } catch (RktUnexpectedOutputException e) {
+        LOG.error("unexpected output received from rkt when executing command [{}]", command, e);
+      }
+    });
+  }
+
   private Response<CatManifestOutput> catManifest(final String id) {
     final CatManifest catManifest = CatManifest.builder()
         .args(ImmutableList.of(id))
@@ -233,7 +255,12 @@ final class RktCommandResource {
         .options(options)
         .args(images)
         .build();
-    return runCommand(fetch);
+    if (request.parameter("async").orElse("false").equals("true")) {
+      submitCommand(fetch);
+      return Response.forStatus(Status.ACCEPTED);
+    } else {
+      return runCommand(fetch);
+    }
   }
 
   private Response<GcOutput> gc(final Request request) {
@@ -258,11 +285,16 @@ final class RktCommandResource {
     return runCommand(list);
   }
 
-  private Response<PrepareOutput> prepare(final PrepareOptions options) {
+  private Response<PrepareOutput> prepare(final PrepareOptions options, final Request request) {
     final Prepare prepare = Prepare.builder()
         .options(options)
         .build();
-    return runCommand(prepare);
+    if (request.parameter("async").orElse("false").equals("true")) {
+      submitCommand(prepare);
+      return Response.forStatus(Status.ACCEPTED);
+    } else {
+      return runCommand(prepare);
+    }
   }
 
   private Response<RmOutput> rm(final Request request) {

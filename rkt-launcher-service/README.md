@@ -54,28 +54,35 @@ For details of `rkt` command, please check `rkt -h`.
 
 ### /rkt
 
-* /rkt/cat-manifest/<id> without payload
-* /rkt/config without payload
-* /rkt/fetch with optional payload and `image` (repeatable) as query parameter
-* /rkt/gc with optional payload
-* /rkt/list without payload
-* /rkt/prepare with mandatory payload
-* /rkt/rm without payload and `id` (repeatable) as query parameter
-* /rkt/rm/<id> without payload
-* /rkt/run with mandatory payload
-* /rkt/run-prepared/<id> with optional payload and `daemonized` as query parameter
-* /rkt/status/<id> with optional payload
-* /rkt/stop with optional payload and `id` (repeatable) as query parameter
-* /rkt/stop/<id> with optional payload
-* /rkt/version without payload
+* `/rkt/cat-manifest/<id>` without payload
+* `/rkt/config` without payload
+* `/rkt/fetch` with optional payload and `image` (repeatable) as query parameter
+* `/rkt/gc` with optional payload
+* `/rkt/list` without payload
+* `/rkt/prepare` with mandatory payload
+* `/rkt/rm` without payload and `id` (repeatable) as query parameter
+* `/rkt/rm/<id>` without payload
+* `/rkt/run` with mandatory payload and `daemonized` as an optional query parameter (default to `true`)
+* `/rkt/run-prepared/<id>` with optional payload and `daemonized` as an optional query parameter (default to `true`)
+* `/rkt/status/<id>` with optional payload
+* `/rkt/stop` with optional payload and `id` (repeatable) as query parameter
+* `/rkt/stop/<id>` with optional payload
+* `/rkt/version` without payload
+
+Both `/rkt/fetch` and `/rkt/prepare` accept `async` as a boolean query
+parameter to instruct the service run corresponding commands asynchronously.
+
+The caller shall be aware that if calling `/rkt/run` or `/rkt/run-prepare`
+with `daemonized` to `false`, the underlying HTTP connection will hang
+until socket reading timeout or `rkt` finishes before timeout.
 
 ### /rkt/image
 
-* /rkt/image/cat-manifest/<id> without payload
-* /rkt/image/gc with optional payload
-* /rkt/image/list without payload
-* /rkt/image/rm without payload and `id` (repeatable) as query parameter
-* /rkt/image/rm/<id> without payload
+* `/rkt/image/cat-manifest/<id>` without payload
+* `/rkt/image/gc` with optional payload
+* `/rkt/image/list` without payload
+* `/rkt/image/rm` without payload and `id` (repeatable) as query parameter
+* `/rkt/image/rm/<id>` without payload
 
 ### Swagger spec
 

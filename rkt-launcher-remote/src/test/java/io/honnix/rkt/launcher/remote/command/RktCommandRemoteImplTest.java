@@ -96,20 +96,20 @@ public class RktCommandRemoteImplTest {
     final FetchOptions options = FetchOptions.builder()
         .full(true)
         .build();
-    rktCommandRemote.fetch(options, "image1", "image2");
+    rktCommandRemote.fetch(options, true, "image1", "image2");
     verifyStatic();
     RktCommandHelper.sendRequest(client,
-                                 "http://localhost:8080/api/v0/rkt/fetch?image=image1&image=image2",
+                                 "http://localhost:8080/api/v0/rkt/fetch?async=true&image=image1&image=image2",
                                  options,
                                  FetchOutput.class);
   }
 
   @Test
   public void shouldCallFetchWithoutOptions() {
-    rktCommandRemote.fetch("image1", "image2");
+    rktCommandRemote.fetch(false, "image1", "image2");
     verifyStatic();
     RktCommandHelper.sendRequest(client,
-                                 "http://localhost:8080/api/v0/rkt/fetch?image=image1&image=image2",
+                                 "http://localhost:8080/api/v0/rkt/fetch?async=false&image=image1&image=image2",
                                  FetchOutput.class);
   }
 
@@ -150,10 +150,10 @@ public class RktCommandRemoteImplTest {
         .addImagesOption(PerImageOptions.builder().image("docker://nginx").build())
         .addImagesOption(PerImageOptions.builder().image("docker://mysql").build())
         .build();
-    rktCommandRemote.prepare(options);
+    rktCommandRemote.prepare(options, true);
     verifyStatic();
     RktCommandHelper.sendRequest(client,
-                                 "http://localhost:8080/api/v0/rkt/prepare",
+                                 "http://localhost:8080/api/v0/rkt/prepare?async=true",
                                  options,
                                  PrepareOutput.class);
   }

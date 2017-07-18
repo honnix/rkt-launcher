@@ -104,14 +104,14 @@ public class RktLauncherRemoteImplTest {
 
   @Test
   public void shouldProxyFetch() {
-    rktLauncherRemote.fetch(FetchOptions.builder().build(), "image1", "image2");
-    verify(rktCommandRemote).fetch(FetchOptions.builder().build(), "image1", "image2");
+    rktLauncherRemote.fetch(FetchOptions.builder().build(), true, "image1", "image2");
+    verify(rktCommandRemote).fetch(FetchOptions.builder().build(), true, "image1", "image2");
   }
 
   @Test
   public void shouldProxyFetchWithoutOptions() {
-    rktLauncherRemote.fetch("image1", "image2");
-    verify(rktCommandRemote).fetch("image1", "image2");
+    rktLauncherRemote.fetch(false, "image1", "image2");
+    verify(rktCommandRemote).fetch(false, "image1", "image2");
   }
 
   @Test
@@ -135,8 +135,8 @@ public class RktLauncherRemoteImplTest {
 
   @Test
   public void shouldProxyPrepare() {
-    rktLauncherRemote.prepare(null);
-    verify(rktCommandRemote).prepare(null);
+    rktLauncherRemote.prepare(null, true);
+    verify(rktCommandRemote).prepare(null, true);
   }
 
   @Test
