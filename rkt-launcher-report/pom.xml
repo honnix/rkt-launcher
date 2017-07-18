@@ -7,7 +7,7 @@
   <parent>
     <groupId>io.honnix</groupId>
     <artifactId>rkt-launcher</artifactId>
-    <version>0.0.4-SNAPSHOT</version>
+    <version>0.0.4</version>
   </parent>
 
   <artifactId>rkt-launcher-report</artifactId>
