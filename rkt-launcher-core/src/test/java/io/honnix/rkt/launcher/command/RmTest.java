@@ -60,6 +60,15 @@ public class RmTest {
   }
 
   @Test
+  public void shouldHaveOnlyOne() {
+    final String output = "rm: moving expired prepared pod \"1e4bb8f2\" to garbage\n"
+                          + "\"1e4bb8f2\"";
+    final RmOutput rmOutput = rm.parse(output);
+    assertEquals(1, rmOutput.removed().size());
+    assertEquals("1e4bb8f2", rmOutput.removed().get(0));
+  }
+
+  @Test
   public void shouldParseEmptyOutput() {
     final RmOutput rmOutput = rm.parse("");
     assertTrue(rmOutput.removed().isEmpty());
