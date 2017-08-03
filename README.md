@@ -17,8 +17,9 @@ APIs through which the user can interact with `rkt` remotely; and last
 but not least, a client is shipped to ease the process talking to the
 service.
 
-This project is still under development. Most of the features have been
-implemented and can be used at the time of writing, but subject to change.
+This project is in beta stage. Most of the features have been
+implemented and can be used for production. Backward compatibility will
+be ensured on a best efforts basis.
 
 ## Usage
 
