@@ -67,6 +67,9 @@ public class ClientTest {
 
     @Override
     public boolean matches(Request right) {
+      if (!right.url().equals(left.url())) {
+        return false;
+      }
       if (!right.method().equals(left.method())) {
         return false;
       }
