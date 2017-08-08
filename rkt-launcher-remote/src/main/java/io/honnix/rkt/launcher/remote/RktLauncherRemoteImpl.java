@@ -28,6 +28,7 @@ import io.honnix.rkt.launcher.options.RunOptions;
 import io.honnix.rkt.launcher.options.RunPreparedOptions;
 import io.honnix.rkt.launcher.options.StatusOptions;
 import io.honnix.rkt.launcher.options.StopOptions;
+import io.honnix.rkt.launcher.options.TrustOptions;
 import io.honnix.rkt.launcher.output.CatManifestOutput;
 import io.honnix.rkt.launcher.output.ConfigOutput;
 import io.honnix.rkt.launcher.output.FetchOutput;
@@ -38,6 +39,7 @@ import io.honnix.rkt.launcher.output.RmOutput;
 import io.honnix.rkt.launcher.output.RunOutput;
 import io.honnix.rkt.launcher.output.StatusOutput;
 import io.honnix.rkt.launcher.output.StopOutput;
+import io.honnix.rkt.launcher.output.TrustOutput;
 import io.honnix.rkt.launcher.output.VersionOutput;
 import io.honnix.rkt.launcher.remote.command.RktCommandRemote;
 import io.honnix.rkt.launcher.remote.command.RktCommandRemoteImpl;
@@ -155,6 +157,16 @@ class RktLauncherRemoteImpl implements RktLauncherRemote {
   @Override
   public CompletionStage<StopOutput> stop(final String id, final String... ids) {
     return rktCommandRemote.stop(id, ids);
+  }
+
+  @Override
+  public CompletionStage<TrustOutput> trust(TrustOptions options, String... pubkeys) {
+    return rktCommandRemote.trust(options, pubkeys);
+  }
+
+  @Override
+  public CompletionStage<TrustOutput> trust(String... pubkeys) {
+    return rktCommandRemote.trust(pubkeys);
   }
 
   @Override

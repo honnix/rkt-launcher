@@ -43,10 +43,12 @@ import io.honnix.rkt.launcher.command.Rm;
 import io.honnix.rkt.launcher.command.Run;
 import io.honnix.rkt.launcher.command.RunPrepared;
 import io.honnix.rkt.launcher.command.Stop;
+import io.honnix.rkt.launcher.command.Trust;
 import io.honnix.rkt.launcher.command.Version;
 import io.honnix.rkt.launcher.exception.RktException;
 import io.honnix.rkt.launcher.exception.RktLauncherException;
 import io.honnix.rkt.launcher.exception.RktUnexpectedOutputException;
+import io.honnix.rkt.launcher.model.TrustedPubkeyBuilder;
 import io.honnix.rkt.launcher.options.FetchOptions;
 import io.honnix.rkt.launcher.options.GcOptions;
 import io.honnix.rkt.launcher.options.ListOptions;
@@ -56,6 +58,7 @@ import io.honnix.rkt.launcher.options.RunOptions;
 import io.honnix.rkt.launcher.options.RunPreparedOptions;
 import io.honnix.rkt.launcher.options.StatusOptions;
 import io.honnix.rkt.launcher.options.StopOptions;
+import io.honnix.rkt.launcher.options.TrustOptions;
 import io.honnix.rkt.launcher.output.CatManifestOutput;
 import io.honnix.rkt.launcher.output.ConfigOutput;
 import io.honnix.rkt.launcher.output.FetchOutput;
@@ -67,10 +70,13 @@ import io.honnix.rkt.launcher.output.RmOutput;
 import io.honnix.rkt.launcher.output.RunOutput;
 import io.honnix.rkt.launcher.output.StatusOutput;
 import io.honnix.rkt.launcher.output.StopOutput;
+import io.honnix.rkt.launcher.output.TrustOutput;
 import io.honnix.rkt.launcher.output.VersionOutput;
 import io.honnix.rkt.launcher.service.exception.RktLauncherServiceException;
 import io.honnix.rkt.launcher.util.Json;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -168,6 +174,10 @@ final class RktCommandResource {
             em.serializerResponse(StopOutput.class),
             DEFAULT_HTTP_METHOD, base + "/stop/<id>",
             rc -> stop(getId(rc), rc.request())),
+        Route.with(
+            em.serializerResponse(TrustOutput.class),
+            DEFAULT_HTTP_METHOD, base + "/trust",
+            rc -> trust(rc.request())),
         Route.with(
             em.serializerResponse(VersionOutput.class),
             DEFAULT_HTTP_METHOD, base + "/version",
@@ -397,6 +407,47 @@ final class RktCommandResource {
 
   private Response<StopOutput> stop(final String id, final Request request) {
     return stop(ImmutableList.of(id), request);
+  }
+
+  private Response<TrustOutput> trust(final Request request) {
+    final List<String> pubkeys = request.parameters().get("pubkey");
+    if (pubkeys != null) {
+      for (String pubkey : pubkeys) {
+        try {
+          final URL url = new URL(pubkey);
+          if ("file".equals(url.getProtocol())) {
+            return Response.forStatus(
+                Status.BAD_REQUEST
+                    .withReasonPhrase("Pubkey cannot point to a local file '" + pubkey + "'"));
+          }
+        } catch (MalformedURLException e) {
+          return Response
+              .forStatus(Status.BAD_REQUEST.withReasonPhrase("Malformed URL '" + pubkey + "'"));
+        }
+      }
+    }
+
+    final TrustOptions options;
+    try {
+      options = readPayloadIfExists(request, TrustOptions.class);
+    } catch (IOException e) {
+      return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase(e.getMessage()));
+    }
+
+    final Trust trust = Trust.builder()
+        .options(options)
+        .args(Optional.ofNullable(pubkeys))
+        .build();
+    final Response<TrustOutput> output = runCommand(trust);
+    return output.withPayload(output.payload()
+                                  .map(payload -> TrustOutput.builder()
+                                      .trustedPubkeys(payload.trustedPubkeys().stream()
+                                                          .map(v -> TrustedPubkeyBuilder.from(v)
+                                                              .location("")
+                                                              .build())
+                                                          .collect(toList()))
+                                      .build())
+                                  .orElse(null));
   }
 
   private Response<VersionOutput> version() {

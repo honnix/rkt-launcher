@@ -1,8 +1,8 @@
 /*-
  * -\-\-
- * rkt-launcher
+ * Spotify rkt-launcher
  * --
- * 
+ * Copyright (C) 2017 Spotify AB
  * --
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,20 @@
  * limitations under the License.
  * -/-/-
  */
-package io.honnix.rkt.launcher.output;
+package io.honnix.rkt.launcher.model;
 
-import io.honnix.rkt.launcher.model.TrustedPubkey;
 import io.norberg.automatter.AutoMatter;
-import java.util.List;
 
 @AutoMatter
-public interface TrustOutput extends Output {
+public interface TrustedPubkey {
 
-  List<TrustedPubkey> trustedPubkeys();
+  String prefix();
 
-  static TrustOutputBuilder builder() {
-    return new TrustOutputBuilder();
+  String key();
+
+  String location();
+
+  static TrustedPubkeyBuilder builder() {
+    return new TrustedPubkeyBuilder();
   }
 }

@@ -29,6 +29,7 @@ import com.spotify.apollo.Response;
 import io.honnix.rkt.launcher.model.ImageBuilder;
 import io.honnix.rkt.launcher.model.PodBuilder;
 import io.honnix.rkt.launcher.model.PullPolicy;
+import io.honnix.rkt.launcher.model.TrustedPubkey;
 import io.honnix.rkt.launcher.model.config.ConfigBuilder;
 import io.honnix.rkt.launcher.model.config.PathsBuilder;
 import io.honnix.rkt.launcher.model.config.Stage1Builder;
@@ -43,6 +44,7 @@ import io.honnix.rkt.launcher.options.RunOptions;
 import io.honnix.rkt.launcher.options.RunPreparedOptions;
 import io.honnix.rkt.launcher.options.StatusOptions;
 import io.honnix.rkt.launcher.options.StopOptions;
+import io.honnix.rkt.launcher.options.TrustOptions;
 import io.honnix.rkt.launcher.output.CatManifestOutput;
 import io.honnix.rkt.launcher.output.ConfigOutput;
 import io.honnix.rkt.launcher.output.FetchOutput;
@@ -53,6 +55,7 @@ import io.honnix.rkt.launcher.output.RmOutput;
 import io.honnix.rkt.launcher.output.RunOutput;
 import io.honnix.rkt.launcher.output.StatusOutput;
 import io.honnix.rkt.launcher.output.StopOutput;
+import io.honnix.rkt.launcher.output.TrustOutput;
 import io.honnix.rkt.launcher.output.VersionOutput;
 import io.honnix.rkt.launcher.util.Json;
 import java.time.Duration;
@@ -506,6 +509,51 @@ public class SystemTest {
         .thenReturn(CompletableFuture.completedFuture(responsePayload));
     final StopOutput response =
         rktLauncherRemote.stop("id1", "id2").toCompletableFuture().get();
+    assertEquals(output, response);
+  }
+
+  @Test
+  public void shouldCallTrust() throws Exception {
+    final TrustOptions options = TrustOptions.builder()
+        .insecureAllowHttp(true)
+        .root(true)
+        .build();
+    final TrustOutput output = TrustOutput.builder()
+        .addTrustedPubkey(TrustedPubkey.builder()
+                              .prefix("example.com")
+                              .key("pubkey1")
+                              .location("")
+                              .build())
+        .build();
+    final Response<ByteString> responsePayload =
+        Response.forPayload(ByteString.of(Json.serialize(output)));
+    when(client.send(
+        Request.forUri("http://localhost:8080/api/v0/rkt/trust?pubkey=http://example.com/pubkey1",
+                       DEFAULT_HTTP_METHOD)
+            .withPayload(ByteString.of(Json.serialize(options)))))
+        .thenReturn(CompletableFuture.completedFuture(responsePayload));
+    final TrustOutput response =
+        rktLauncherRemote.trust(options, "http://example.com/pubkey1").toCompletableFuture().get();
+    assertEquals(output, response);
+  }
+
+  @Test
+  public void shouldCallTrustWithoutOptions() throws Exception {
+    final TrustOutput output = TrustOutput.builder()
+        .addTrustedPubkey(TrustedPubkey.builder()
+                              .prefix("")
+                              .key("pubkey1")
+                              .location("")
+                              .build())
+        .build();
+    final Response<ByteString> responsePayload =
+        Response.forPayload(ByteString.of(Json.serialize(output)));
+    when(client.send(
+        Request.forUri("http://localhost:8080/api/v0/rkt/trust?pubkey=http://example.com/pubkey1",
+                       DEFAULT_HTTP_METHOD)))
+        .thenReturn(CompletableFuture.completedFuture(responsePayload));
+    final TrustOutput response =
+        rktLauncherRemote.trust("http://example.com/pubkey1").toCompletableFuture().get();
     assertEquals(output, response);
   }
 

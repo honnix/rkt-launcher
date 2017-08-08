@@ -19,7 +19,9 @@
  */
 package io.honnix.rkt.launcher.command;
 
+import com.google.common.collect.Lists;
 import io.honnix.rkt.launcher.exception.RktUnexpectedOutputException;
+import io.honnix.rkt.launcher.model.TrustedPubkey;
 import io.honnix.rkt.launcher.options.TrustOptions;
 import io.honnix.rkt.launcher.output.TrustOutput;
 import io.honnix.rkt.launcher.output.TrustOutputBuilder;
@@ -30,7 +32,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @AutoMatter
-public interface Trust extends CommandWithArgs<TrustOptions, TrustOutput> {
+public interface Trust extends CommandWithOptionalArgs<TrustOptions, TrustOutput> {
 
   @Override
   Optional<TrustOptions> options();
@@ -46,27 +48,38 @@ public interface Trust extends CommandWithArgs<TrustOptions, TrustOutput> {
 
     final Pattern prefixPattern = Pattern.compile("pubkey: prefix: \"(.*)\"");
     final Pattern keyPattern = Pattern.compile("key: \"(.+)\"");
-    final Pattern localtionPattern = Pattern.compile("Added .* at \"(.+)\"");
+    final Pattern locationPattern = Pattern.compile("Added .* at \"(.+)\"");
+
+    final List<String> prefixes = Lists.newArrayList();
+    final List<String> keys = Lists.newArrayList();
+    final List<String> locations = Lists.newArrayList();
 
     final Matcher prefixMatcher = prefixPattern.matcher(output);
-    if (prefixMatcher.find()) {
-      trustOutputBuilder.prefix(prefixMatcher.group(1));
-    } else {
-      throw new RktUnexpectedOutputException("no prefix found");
+    while (prefixMatcher.find()) {
+      prefixes.add(prefixMatcher.group(1));
     }
 
     final Matcher keyMatcher = keyPattern.matcher(output);
-    if (keyMatcher.find()) {
-      trustOutputBuilder.key(keyMatcher.group(1));
-    } else {
-      throw new RktUnexpectedOutputException("no key found");
+    while (keyMatcher.find()) {
+      keys.add(keyMatcher.group(1));
     }
 
-    final Matcher locationMatcher = localtionPattern.matcher(output);
-    if (locationMatcher.find()) {
-      trustOutputBuilder.location(locationMatcher.group(1));
+    final Matcher locationMatcher = locationPattern.matcher(output);
+    while (locationMatcher.find()) {
+      locations.add(locationMatcher.group(1));
+    }
+    
+    if (prefixes.size() == keys.size() && prefixes.size() == locations.size()) {
+      for (int i = 0; i < prefixes.size(); ++i) {
+        final TrustedPubkey trustedPubkey = TrustedPubkey.builder()
+            .prefix(prefixes.get(i))
+            .key(keys.get(i))
+            .location(locations.get(i))
+            .build();
+        trustOutputBuilder.addTrustedPubkey(trustedPubkey);
+      }
     } else {
-      throw new RktUnexpectedOutputException("no location found");
+      throw new RktUnexpectedOutputException("missing value(s) in output");
     }
 
     return trustOutputBuilder.build();

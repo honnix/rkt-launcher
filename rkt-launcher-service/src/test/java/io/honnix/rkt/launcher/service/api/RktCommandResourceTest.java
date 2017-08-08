@@ -49,12 +49,14 @@ import io.honnix.rkt.launcher.command.Run;
 import io.honnix.rkt.launcher.command.RunPrepared;
 import io.honnix.rkt.launcher.command.Status;
 import io.honnix.rkt.launcher.command.Stop;
+import io.honnix.rkt.launcher.command.Trust;
 import io.honnix.rkt.launcher.command.Version;
 import io.honnix.rkt.launcher.exception.RktException;
 import io.honnix.rkt.launcher.exception.RktLauncherException;
 import io.honnix.rkt.launcher.exception.RktUnexpectedOutputException;
 import io.honnix.rkt.launcher.model.PodBuilder;
 import io.honnix.rkt.launcher.model.PullPolicy;
+import io.honnix.rkt.launcher.model.TrustedPubkey;
 import io.honnix.rkt.launcher.model.config.ConfigBuilder;
 import io.honnix.rkt.launcher.model.config.PathsBuilder;
 import io.honnix.rkt.launcher.model.config.Stage1Builder;
@@ -69,6 +71,7 @@ import io.honnix.rkt.launcher.options.RunOptions;
 import io.honnix.rkt.launcher.options.RunPreparedOptions;
 import io.honnix.rkt.launcher.options.StatusOptions;
 import io.honnix.rkt.launcher.options.StopOptions;
+import io.honnix.rkt.launcher.options.TrustOptions;
 import io.honnix.rkt.launcher.output.CatManifestOutput;
 import io.honnix.rkt.launcher.output.ConfigOutput;
 import io.honnix.rkt.launcher.output.FetchOutput;
@@ -79,6 +82,7 @@ import io.honnix.rkt.launcher.output.RmOutput;
 import io.honnix.rkt.launcher.output.RunOutput;
 import io.honnix.rkt.launcher.output.StatusOutput;
 import io.honnix.rkt.launcher.output.StopOutput;
+import io.honnix.rkt.launcher.output.TrustOutput;
 import io.honnix.rkt.launcher.output.VersionOutput;
 import io.honnix.rkt.launcher.util.Json;
 import java.io.IOException;
@@ -915,6 +919,144 @@ public class RktCommandResourceTest extends VersionedApiTest {
     sinceVersion(Api.Version.V0);
     final Response<ByteString> response = awaitResponse(
         serviceHelper.request(DEFAULT_HTTP_METHOD, path("/stop/123"),
+                              ByteString.of("this is payload".getBytes())));
+    assertThat(response, hasStatus(belongsToFamily(StatusType.Family.CLIENT_ERROR)));
+  }
+
+  @Test
+  public void shouldRunTrustWithoutPayload() throws Exception {
+    sinceVersion(Api.Version.V0);
+    final Trust trust = Trust.builder()
+        .args(ImmutableList.of("http://example.com/pubkey1"))
+        .build();
+    final TrustOutput trustOutput = TrustOutput.builder()
+        .addTrustedPubkey(TrustedPubkey.builder()
+                              .prefix("")
+                              .key("http://example.com/pubkey1")
+                              .location("")
+                              .build())
+        .build();
+    when(rktLauncher.run(trust)).thenReturn(trustOutput);
+    final Response<ByteString> response = awaitResponse(
+        serviceHelper
+            .request(DEFAULT_HTTP_METHOD, path("/trust?pubkey=http://example.com/pubkey1")));
+    assertThat(response, hasStatus(belongsToFamily(StatusType.Family.SUCCESSFUL)));
+    assertTrue(response.payload().isPresent());
+    assertEquals(trustOutput,
+                 Json.deserialize(response.payload().get().toByteArray(), TrustOutput.class));
+  }
+
+  @Test
+  public void shouldRunTrustWithPayload() throws Exception {
+    sinceVersion(Api.Version.V0);
+    final TrustOptions options = TrustOptions.builder()
+        .insecureAllowHttp(true)
+        .prefix("example.com")
+        .build();
+    final Trust trust = Trust.builder()
+        .options(options)
+        .args(ImmutableList.of("http://example.com/pubkey1"))
+        .build();
+    final TrustOutput trustOutput = TrustOutput.builder()
+        .addTrustedPubkey(TrustedPubkey.builder()
+                              .prefix("example.com")
+                              .key("http://example.com/pubkey1")
+                              .location("")
+                              .build())
+        .build();
+    when(rktLauncher.run(trust)).thenReturn(trustOutput);
+    final Response<ByteString> response = awaitResponse(
+        serviceHelper
+            .request(DEFAULT_HTTP_METHOD, path("/trust?pubkey=http://example.com/pubkey1"),
+                     ByteString.of(Json.serialize(options))));
+    assertThat(response, hasStatus(belongsToFamily(StatusType.Family.SUCCESSFUL)));
+    assertTrue(response.payload().isPresent());
+    assertEquals(trustOutput,
+                 Json.deserialize(response.payload().get().toByteArray(), TrustOutput.class));
+  }
+
+  @Test
+  public void shouldRunTrustWithoutPubkeyWithPayload() throws Exception {
+    sinceVersion(Api.Version.V0);
+    final TrustOptions options = TrustOptions.builder()
+        .insecureAllowHttp(true)
+        .prefix("example.com")
+        .build();
+    final Trust trust = Trust.builder()
+        .options(options)
+        .build();
+    final TrustOutput trustOutput = TrustOutput.builder()
+        .addTrustedPubkey(TrustedPubkey.builder()
+                              .prefix("example.com")
+                              .key("http://example.com/pubkey1")
+                              .location("")
+                              .build())
+        .build();
+    when(rktLauncher.run(trust)).thenReturn(trustOutput);
+    final Response<ByteString> response = awaitResponse(
+        serviceHelper
+            .request(DEFAULT_HTTP_METHOD, path("/trust"),
+                     ByteString.of(Json.serialize(options))));
+    assertThat(response, hasStatus(belongsToFamily(StatusType.Family.SUCCESSFUL)));
+    assertTrue(response.payload().isPresent());
+    assertEquals(trustOutput,
+                 Json.deserialize(response.payload().get().toByteArray(), TrustOutput.class));
+  }
+
+  @Test
+  public void shouldRunTrustWithoutPayloadMultiple() throws Exception {
+    sinceVersion(Api.Version.V0);
+    final Trust trust = Trust.builder()
+        .args(ImmutableList.of("http://example.com/pubkey1", "http://example.com/pubkey2"))
+        .build();
+    final TrustOutput trustOutput = TrustOutput.builder()
+        .addTrustedPubkey(TrustedPubkey.builder()
+                              .prefix("")
+                              .key("http://example.com/pubkey1")
+                              .location("")
+                              .build())
+        .addTrustedPubkey(TrustedPubkey.builder()
+                              .prefix("")
+                              .key("http://example.com/pubkey2")
+                              .location("")
+                              .build())
+        .build();
+    when(rktLauncher.run(trust)).thenReturn(trustOutput);
+    final Response<ByteString> response = awaitResponse(
+        serviceHelper
+            .request(DEFAULT_HTTP_METHOD, path("/trust?pubkey=http://example.com/pubkey1"
+                                               + "&pubkey=http://example.com/pubkey2")));
+    assertThat(response, hasStatus(belongsToFamily(StatusType.Family.SUCCESSFUL)));
+    assertTrue(response.payload().isPresent());
+    assertEquals(trustOutput,
+                 Json.deserialize(response.payload().get().toByteArray(), TrustOutput.class));
+  }
+
+  @Test
+  public void shouldNotRunTrustWithMalformedUrl() throws Exception {
+    sinceVersion(Api.Version.V0);
+    final Response<ByteString> response = awaitResponse(
+        serviceHelper
+            .request(DEFAULT_HTTP_METHOD, path("/trust?pubkey=example.com/pubkey1")));
+    assertThat(response, hasStatus(belongsToFamily(StatusType.Family.CLIENT_ERROR)));
+    assertTrue(response.status().reasonPhrase().contains("Malformed URL"));
+  }
+
+  @Test
+  public void shouldNotRunTrustWithLocalFileUrl() throws Exception {
+    sinceVersion(Api.Version.V0);
+    final Response<ByteString> response = awaitResponse(
+        serviceHelper
+            .request(DEFAULT_HTTP_METHOD, path("/trust?pubkey=file:///usr/pubkey1")));
+    assertThat(response, hasStatus(belongsToFamily(StatusType.Family.CLIENT_ERROR)));
+    assertTrue(response.status().reasonPhrase().contains("cannot point to"));
+  }
+
+  @Test
+  public void shouldNotRunTrustWithInvalidPayload() throws Exception {
+    sinceVersion(Api.Version.V0);
+    final Response<ByteString> response = awaitResponse(
+        serviceHelper.request(DEFAULT_HTTP_METHOD, path("/trust"),
                               ByteString.of("this is payload".getBytes())));
     assertThat(response, hasStatus(belongsToFamily(StatusType.Family.CLIENT_ERROR)));
   }
