@@ -35,6 +35,8 @@ public interface Pod {
   Optional<List<NetInfo>> networks();
 
   Optional<List<String>> appNames();
+  
+  Optional<List<App>> apps();
 
   Optional<Instant> startedAt();
 

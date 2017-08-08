@@ -19,17 +19,26 @@
  */
 package io.honnix.rkt.launcher.model;
 
-import static org.junit.Assert.assertEquals;
-
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.honnix.rkt.launcher.util.Time;
+import io.norberg.automatter.AutoMatter;
 import java.time.Instant;
-import org.junit.Test;
 
-public class ImageTest {
+@AutoMatter
+public interface App {
 
-  @Test
-  public void shouldConvert() {
-    final Long nano = 1491859470078086852L;
-    final Instant instant = new Image.Nano2Instant().convert(nano);
-    assertEquals(nano, new Image.Instant2Nano().convert(instant));
-  }
+  String name();
+
+  String state();
+
+  @JsonDeserialize(converter = Time.Nano2Instant.class)
+  @JsonSerialize(converter = Time.Instant2Nano.class)
+  Instant createdAt();
+
+  @JsonDeserialize(converter = Time.Nano2Instant.class)
+  @JsonSerialize(converter = Time.Instant2Nano.class)
+  Instant startedAt();
+  
+  String imageId();
 }

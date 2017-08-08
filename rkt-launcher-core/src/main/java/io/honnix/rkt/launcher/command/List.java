@@ -49,7 +49,9 @@ public interface List extends CommandWithoutArgs<ListOptions, ListOutput> {
         .replaceAll("\"app_names\"", "\"appNames\"")
         .replaceAll("\"started_at\"", "\"startedAt\"")
         .replaceAll("\"user_annotations\"", "\"userAnnotations\"")
-        .replaceAll("\"user_labels\"", "\"userLabels\"");
+        .replaceAll("\"user_labels\"", "\"userLabels\"")
+        .replaceAll("\"created_at\"", "\"createdAt\"")
+        .replaceAll("\"image_id\"", "\"imageId\"");
     try {
       final java.util.List<Pod> pods = Json.deserialize(
           modifiedOutput,
