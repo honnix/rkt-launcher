@@ -213,7 +213,7 @@ public class RktCommandRemoteImpl implements RktCommandRemote {
   }
 
   @Override
-  public CompletionStage<TrustOutput> trust(TrustOptions options, String... pubkeys) {
+  public CompletionStage<TrustOutput> trust(final TrustOptions options, final String... pubkeys) {
     return RktCommandHelper.sendRequest(client,
                                         RktCommandHelper.uri(apiHost,
                                                              ImmutableMap.of("pubkey", ImmutableList
@@ -224,7 +224,7 @@ public class RktCommandRemoteImpl implements RktCommandRemote {
   }
 
   @Override
-  public CompletionStage<TrustOutput> trust(String... pubkeys) {
+  public CompletionStage<TrustOutput> trust(final String... pubkeys) {
     return RktCommandHelper.sendRequest(client,
                                         RktCommandHelper.uri(apiHost,
                                                              ImmutableMap.of("pubkey", ImmutableList

@@ -19,18 +19,21 @@
  */
 package io.honnix.rkt.launcher.model;
 
-import io.norberg.automatter.AutoMatter;
+import static junit.framework.TestCase.assertEquals;
 
-@AutoMatter
-public interface TrustedPubkey {
+import org.junit.Test;
 
-  String prefix();
+public class TrustedPubkeyTest {
 
-  String key();
-
-  String location();
-
-  static TrustedPubkeyBuilder builder() {
-    return new TrustedPubkeyBuilder();
+  @Test
+  public void shouldBuild() {
+    final TrustedPubkey trustedPubkey = TrustedPubkey.builder()
+        .key("key")
+        .prefix("prefix")
+        .location("location")
+        .build();
+    assertEquals("key", trustedPubkey.key());
+    assertEquals("prefix", trustedPubkey.prefix());
+    assertEquals("location", trustedPubkey.location());
   }
 }

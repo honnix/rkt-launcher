@@ -160,12 +160,12 @@ class RktLauncherRemoteImpl implements RktLauncherRemote {
   }
 
   @Override
-  public CompletionStage<TrustOutput> trust(TrustOptions options, String... pubkeys) {
+  public CompletionStage<TrustOutput> trust(final TrustOptions options, final String... pubkeys) {
     return rktCommandRemote.trust(options, pubkeys);
   }
 
   @Override
-  public CompletionStage<TrustOutput> trust(String... pubkeys) {
+  public CompletionStage<TrustOutput> trust(final String... pubkeys) {
     return rktCommandRemote.trust(pubkeys);
   }
 
