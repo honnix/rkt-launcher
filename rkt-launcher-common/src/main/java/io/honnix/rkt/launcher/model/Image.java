@@ -21,45 +21,23 @@ package io.honnix.rkt.launcher.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.util.StdConverter;
+import io.honnix.rkt.launcher.util.Time;
 import io.norberg.automatter.AutoMatter;
 import java.time.Instant;
 
 @AutoMatter
 public interface Image {
 
-  class Nano2Instant extends StdConverter<Long, Instant> {
-
-    private static final long NANOS_PER_SECOND = 1000_000_000L;
-
-    @Override
-    public Instant convert(final Long value) {
-      final long seconds = value / NANOS_PER_SECOND;
-      final long nanoseconds = value % NANOS_PER_SECOND;
-      return Instant.ofEpochSecond(seconds, nanoseconds);
-    }
-  }
-
-  class Instant2Nano extends StdConverter<Instant, Long> {
-
-    private static final long NANOS_PER_SECOND = 1000_000_000L;
-
-    @Override
-    public Long convert(final Instant value) {
-      return value.getEpochSecond() * NANOS_PER_SECOND + value.getNano();
-    }
-  }
-
   String id();
 
   String name();
 
-  @JsonDeserialize(converter = Nano2Instant.class)
-  @JsonSerialize(converter = Instant2Nano.class)
+  @JsonDeserialize(converter = Time.Nano2Instant.class)
+  @JsonSerialize(converter = Time.Instant2Nano.class)
   Instant importTime();
 
-  @JsonDeserialize(converter = Nano2Instant.class)
-  @JsonSerialize(converter = Instant2Nano.class)
+  @JsonDeserialize(converter = Time.Nano2Instant.class)
+  @JsonSerialize(converter = Time.Instant2Nano.class)
   Instant lastUsedTime();
 
   int size();

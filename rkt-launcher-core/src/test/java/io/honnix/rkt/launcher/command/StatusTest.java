@@ -74,6 +74,15 @@ public class StatusTest {
                         + "  \"app_names\": [\n"
                         + "    \"nginx\"\n"
                         + "  ],\n"
+                        + "  \"apps\": [\n"
+                        + "    {\n"
+                        + "      \"name\": \"redis\",\n"
+                        + "      \"state\": \"running\",\n"
+                        + "      \"created_at\": 1502192853851821300,\n"
+                        + "      \"started_at\": 1502192853947821300,\n"
+                        + "      \"image_id\": \"sha512-5ab3bca3027d512e181862990e153361ed37e67af9b4aeeb0637100ee473d234\"\n"
+                        + "    }\n"
+                        + "  ],\n"
                         + "  \"started_at\": 1497280167\n"
                         + "}";
 

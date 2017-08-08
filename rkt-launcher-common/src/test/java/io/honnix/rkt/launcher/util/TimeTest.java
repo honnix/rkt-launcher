@@ -27,6 +27,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.time.Duration;
+import java.time.Instant;
 import org.junit.Test;
 
 public class TimeTest {
@@ -67,5 +68,12 @@ public class TimeTest {
     assertTrue(Modifier.isPrivate(constructor.getModifiers()));
     constructor.setAccessible(true);
     constructor.newInstance();
+  }
+
+  @Test
+  public void shouldConvert() {
+    final Long nano = 1491859470078086852L;
+    final Instant instant = new Time.Nano2Instant().convert(nano);
+    assertEquals(nano, new Time.Instant2Nano().convert(instant));
   }
 }

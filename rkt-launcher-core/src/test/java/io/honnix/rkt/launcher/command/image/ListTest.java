@@ -30,6 +30,7 @@ import io.honnix.rkt.launcher.model.Image;
 import io.honnix.rkt.launcher.model.ImageBuilder;
 import io.honnix.rkt.launcher.options.image.ListOptions;
 import io.honnix.rkt.launcher.util.Json;
+import io.honnix.rkt.launcher.util.Time;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -108,8 +109,8 @@ public class ListTest {
     final Image image = new ImageBuilder()
         .id("sha512-887890e697d9a0229eff22436def3c436cb4b18f72ac274c8c05427b39539307")
         .name("coreos.com/rkt/stage1-coreos:1.25.0")
-        .importTime(new Image.Nano2Instant().convert(1491859470078086852L))
-        .lastUsedTime(new Image.Nano2Instant().convert(1497150284380714857L))
+        .importTime(new Time.Nano2Instant().convert(1491859470078086852L))
+        .lastUsedTime(new Time.Nano2Instant().convert(1497150284380714857L))
         .size(234530175)
         .build();
     final String json = new String(Json.serialize(image));

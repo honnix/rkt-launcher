@@ -19,9 +19,33 @@
  */
 package io.honnix.rkt.launcher.util;
 
+import com.fasterxml.jackson.databind.util.StdConverter;
 import java.time.Duration;
+import java.time.Instant;
 
 public final class Time {
+
+  public static class Nano2Instant extends StdConverter<Long, Instant> {
+
+    private static final long NANOS_PER_SECOND = 1000_000_000L;
+
+    @Override
+    public Instant convert(final Long value) {
+      final long seconds = value / NANOS_PER_SECOND;
+      final long nanoseconds = value % NANOS_PER_SECOND;
+      return Instant.ofEpochSecond(seconds, nanoseconds);
+    }
+  }
+
+  public static class Instant2Nano extends StdConverter<Instant, Long> {
+
+    private static final long NANOS_PER_SECOND = 1000_000_000L;
+
+    @Override
+    public Long convert(final Instant value) {
+      return value.getEpochSecond() * NANOS_PER_SECOND + value.getNano();
+    }
+  }
 
   private Time() {
   }
