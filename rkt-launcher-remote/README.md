@@ -41,6 +41,28 @@ try (Service.Instance instance = rktRemoteService.start()) {
 }
 ```
 
+Or instead of using a full-featured Apollo Client, a light-weighted client
+is provided by this module.
+
+```
+import io.honnix.rkt.launcher.remote.http.Client;
+
+...
+final Client client = new Client(new OkHttpClient());
+final RktLauncherRemote rktLauncherRemote = RktLauncherRemote.builder()
+    .scheme(HTTP)
+    .host("rkt.example.com")
+    .port(80)
+    .client(client)
+    .build();
+final RunOptions options = RunOptions.builder()
+    .addImagesOption(PerImageOptions.builder().image("docker://nginx").build())
+    .build();
+rktLauncherRemote.run(options, true);
+final CompletionStage<RunOutput> output = rktCommandRemote.run(options, true);
+...
+```
+
 ### More examples
 
 [SystemTest.java](src/test/java/io/honnix/rkt/launcher/remote/SystemTest.java)
