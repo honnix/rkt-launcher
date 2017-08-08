@@ -29,6 +29,7 @@ import io.honnix.rkt.launcher.options.RunOptions;
 import io.honnix.rkt.launcher.options.RunPreparedOptions;
 import io.honnix.rkt.launcher.options.StatusOptions;
 import io.honnix.rkt.launcher.options.StopOptions;
+import io.honnix.rkt.launcher.options.TrustOptions;
 import io.honnix.rkt.launcher.output.CatManifestOutput;
 import io.honnix.rkt.launcher.output.ConfigOutput;
 import io.honnix.rkt.launcher.output.FetchOutput;
@@ -39,6 +40,7 @@ import io.honnix.rkt.launcher.output.RmOutput;
 import io.honnix.rkt.launcher.output.RunOutput;
 import io.honnix.rkt.launcher.output.StatusOutput;
 import io.honnix.rkt.launcher.output.StopOutput;
+import io.honnix.rkt.launcher.output.TrustOutput;
 import io.honnix.rkt.launcher.output.VersionOutput;
 import java.net.URI;
 import java.util.Objects;
@@ -208,6 +210,27 @@ public class RktCommandRemoteImpl implements RktCommandRemote {
                                                                  .merge(id, ids)),
                                                              "stop"),
                                         StopOutput.class);
+  }
+
+  @Override
+  public CompletionStage<TrustOutput> trust(final TrustOptions options, final String... pubkeys) {
+    return RktCommandHelper.sendRequest(client,
+                                        RktCommandHelper.uri(apiHost,
+                                                             ImmutableMap.of("pubkey", ImmutableList
+                                                                 .copyOf(pubkeys)),
+                                                             "trust"),
+                                        options,
+                                        TrustOutput.class);
+  }
+
+  @Override
+  public CompletionStage<TrustOutput> trust(final String... pubkeys) {
+    return RktCommandHelper.sendRequest(client,
+                                        RktCommandHelper.uri(apiHost,
+                                                             ImmutableMap.of("pubkey", ImmutableList
+                                                                 .copyOf(pubkeys)),
+                                                             "trust"),
+                                        TrustOutput.class);
   }
 
   @Override

@@ -67,6 +67,7 @@ For details of `rkt` command, please check `rkt -h`.
 * `/rkt/status/<id>` with optional payload
 * `/rkt/stop` with optional payload and `id` (repeatable) as query parameter
 * `/rkt/stop/<id>` with optional payload
+* `/rkt/trust` with optional payload and `pubkey` (optional and repeatable) as query parameter
 * `/rkt/version` without payload
 
 Both `/rkt/fetch` and `/rkt/prepare` accept `async` as a boolean query
