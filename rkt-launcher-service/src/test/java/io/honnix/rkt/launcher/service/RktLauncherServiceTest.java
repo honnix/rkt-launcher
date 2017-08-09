@@ -44,7 +44,7 @@ public class RktLauncherServiceTest {
     mockStatic(HttpService.class);
     RktLauncherService.main(new String[]{"arg"});
     verifyStatic();
-    HttpService.boot(isA(RktLauncherApi.class), eq("rkt-launcher-remote"), eq("arg"));
+    HttpService.boot(isA(RktLauncherApi.class), eq("rkt-launcher-service"), eq("arg"));
   }
 
   @Test

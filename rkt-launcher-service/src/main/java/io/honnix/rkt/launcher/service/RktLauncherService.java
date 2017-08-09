@@ -29,6 +29,6 @@ public final class RktLauncherService {
   }
 
   public static void main(final String[] args) throws LoadingException {
-    HttpService.boot(new RktLauncherApi(), "rkt-launcher-remote", args);
+    HttpService.boot(new RktLauncherApi(), "rkt-launcher-service", args);
   }
 }
