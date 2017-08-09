@@ -681,13 +681,14 @@ public class SystemTest {
         .options(TrustOptions.builder()
                      .root(true)
                      .build())
-        .addArg("test.key")
+        .args(ImmutableList.of("test.key"))
         .build();
     final TrustOutput trustOutput = rktLauncher.run(trust);
-    assertEquals("test.key", trustOutput.key());
+    assertEquals(1, trustOutput.trustedPubkeys().size());
+    assertEquals("test.key", trustOutput.trustedPubkeys().get(0).key());
     assertEquals("/etc/rkt/trustedkeys/root.d/33671532095f91c5cb267b35882bfd6b87cfc5e9",
-                 trustOutput.location());
-    assertEquals("", trustOutput.prefix());
+                 trustOutput.trustedPubkeys().get(0).location());
+    assertEquals("", trustOutput.trustedPubkeys().get(0).prefix());
   }
 
   @Test

@@ -17,18 +17,23 @@
  * limitations under the License.
  * -/-/-
  */
-package io.honnix.rkt.launcher.output;
+package io.honnix.rkt.launcher.model;
 
-import io.honnix.rkt.launcher.model.TrustedPubkey;
-import io.norberg.automatter.AutoMatter;
-import java.util.List;
+import static junit.framework.TestCase.assertEquals;
 
-@AutoMatter
-public interface TrustOutput extends Output {
+import org.junit.Test;
 
-  List<TrustedPubkey> trustedPubkeys();
+public class TrustedPubkeyTest {
 
-  static TrustOutputBuilder builder() {
-    return new TrustOutputBuilder();
+  @Test
+  public void shouldBuild() {
+    final TrustedPubkey trustedPubkey = TrustedPubkey.builder()
+        .key("key")
+        .prefix("prefix")
+        .location("location")
+        .build();
+    assertEquals("key", trustedPubkey.key());
+    assertEquals("prefix", trustedPubkey.prefix());
+    assertEquals("location", trustedPubkey.location());
   }
 }

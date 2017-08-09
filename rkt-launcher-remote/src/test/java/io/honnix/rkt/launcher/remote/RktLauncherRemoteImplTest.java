@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import com.spotify.apollo.Client;
 import io.honnix.rkt.launcher.options.FetchOptions;
 import io.honnix.rkt.launcher.options.StopOptions;
+import io.honnix.rkt.launcher.options.TrustOptions;
 import io.honnix.rkt.launcher.remote.command.RktCommandRemote;
 import io.honnix.rkt.launcher.remote.command.RktImageCommandRemote;
 import org.junit.Before;
@@ -185,6 +186,18 @@ public class RktLauncherRemoteImplTest {
   public void shouldProxyStopWithoutOptions() {
     rktLauncherRemote.stop("id1", "id2");
     verify(rktCommandRemote).stop("id1", "id2");
+  }
+
+  @Test
+  public void shouldProxyTrust() {
+    rktLauncherRemote.trust(TrustOptions.builder().build(), "pubkey1", "pubkey2");
+    verify(rktCommandRemote).trust(TrustOptions.builder().build(), "pubkey1", "pubkey2");
+  }
+
+  @Test
+  public void shouldProxyTrustWithoutOptions() {
+    rktLauncherRemote.trust("pubkey1", "pubkey2");
+    verify(rktCommandRemote).trust("pubkey1", "pubkey2");
   }
 
   @Test

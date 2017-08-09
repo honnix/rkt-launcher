@@ -33,6 +33,7 @@ import io.honnix.rkt.launcher.options.RunOptions;
 import io.honnix.rkt.launcher.options.RunPreparedOptions;
 import io.honnix.rkt.launcher.options.StatusOptions;
 import io.honnix.rkt.launcher.options.StopOptions;
+import io.honnix.rkt.launcher.options.TrustOptions;
 import io.honnix.rkt.launcher.output.CatManifestOutput;
 import io.honnix.rkt.launcher.output.ConfigOutput;
 import io.honnix.rkt.launcher.output.FetchOutput;
@@ -43,6 +44,7 @@ import io.honnix.rkt.launcher.output.RmOutput;
 import io.honnix.rkt.launcher.output.RunOutput;
 import io.honnix.rkt.launcher.output.StatusOutput;
 import io.honnix.rkt.launcher.output.StopOutput;
+import io.honnix.rkt.launcher.output.TrustOutput;
 import io.honnix.rkt.launcher.output.VersionOutput;
 import java.net.URI;
 import java.time.Duration;
@@ -244,6 +246,31 @@ public class RktCommandRemoteImplTest {
     RktCommandHelper.sendRequest(client,
                                  "http://localhost:8080/api/v0/rkt/stop?id=id1&id=id2",
                                  StopOutput.class);
+  }
+
+  @Test
+  public void shouldCallTrust() {
+    final TrustOptions options = TrustOptions.builder()
+        .insecureAllowHttp(true)
+        .root(true)
+        .build();
+    rktCommandRemote.trust(options, "pubkey1", "pubkey2");
+    verifyStatic();
+    RktCommandHelper.sendRequest(client,
+                                 "http://localhost:8080/api/v0/rkt/trust?pubkey=pubkey1"
+                                 + "&pubkey=pubkey2",
+                                 options,
+                                 TrustOutput.class);
+  }
+
+  @Test
+  public void shouldCallTrustWithoutOptions() {
+    rktCommandRemote.trust("pubkey1", "pubkey2");
+    verifyStatic();
+    RktCommandHelper.sendRequest(client,
+                                 "http://localhost:8080/api/v0/rkt/trust?pubkey=pubkey1"
+                                 + "&pubkey=pubkey2",
+                                 TrustOutput.class);
   }
 
   @Test

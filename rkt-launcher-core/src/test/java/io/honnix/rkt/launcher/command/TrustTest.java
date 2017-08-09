@@ -38,8 +38,7 @@ public class TrustTest {
         .options(TrustOptions.builder()
                      .root(true)
                      .build())
-        .addArg("arg1")
-        .addArg("arg2")
+        .args(ImmutableList.of("arg1", "arg2"))
         .build();
   }
 
@@ -64,10 +63,11 @@ public class TrustTest {
                           + "Trusting \"test.key\" for prefix \"\" without fingerprint review.\n"
                           + "Added root key at \"/etc/rkt/trustedkeys/root.d/33671532095f91c5cb267b35882bfd6b87cfc5e9\"";
     final TrustOutput trustOutput = trust.parse(output);
-    assertEquals("", trustOutput.prefix());
-    assertEquals("test.key", trustOutput.key());
+    assertEquals(1, trustOutput.trustedPubkeys().size());
+    assertEquals("", trustOutput.trustedPubkeys().get(0).prefix());
+    assertEquals("test.key", trustOutput.trustedPubkeys().get(0).key());
     assertEquals("/etc/rkt/trustedkeys/root.d/33671532095f91c5cb267b35882bfd6b87cfc5e9",
-                 trustOutput.location());
+                 trustOutput.trustedPubkeys().get(0).location());
   }
 
   @Test
@@ -81,11 +81,44 @@ public class TrustTest {
                           + "Trusting \"test.key\" for prefix \"example.com/foo\" without fingerprint review.\n"
                           + "Added key for prefix \"example.com/foo\" at \"/etc/rkt/trustedkeys/prefix.d/example.com/foo/33671532095f91c5cb267b35882bfd6b87cfc5e9\"";
     final TrustOutput trustOutput = trust.parse(output);
-    assertEquals("example.com/foo", trustOutput.prefix());
-    assertEquals("test.key", trustOutput.key());
+    assertEquals(1, trustOutput.trustedPubkeys().size());
+    assertEquals("example.com/foo", trustOutput.trustedPubkeys().get(0).prefix());
+    assertEquals("test.key", trustOutput.trustedPubkeys().get(0).key());
     assertEquals(
         "/etc/rkt/trustedkeys/prefix.d/example.com/foo/33671532095f91c5cb267b35882bfd6b87cfc5e9",
-        trustOutput.location());
+        trustOutput.trustedPubkeys().get(0).location());
+  }
+
+  @Test
+  public void shouldParseOutputForSpecifiedPrefixMultiple() {
+    final String output = "pubkey: prefix: \"example.com/foo\"\n"
+                          + "key: \"test1.key\"\n"
+                          + "gpg key fingerprint is: 3367 1532 095F 91C5 CB26  7B35 882B FD6B 87CF C5E9\n"
+                          + "    Subkey fingerprint: 8009 438D 951F 67A7 7F06  8BD3 E75D F9C2 35EC 0676\n"
+                          + "    Subkey fingerprint: 818B 5C43 34EB E280 A3CB  D285 3810 BDA9 2FCB 61B2\n"
+                          + "\ta (a) <a@a.com>\n"
+                          + "Trusting \"test.key\" for prefix \"example.com/foo\" without fingerprint review.\n"
+                          + "Added key for prefix \"example.com/foo\" at \"/etc/rkt/trustedkeys/prefix.d/example.com/foo/33671532095f91c5cb267b35882bfd6b87cfc5e9\"\n"
+                          + "pubkey: prefix: \"example.com/bar\"\n"
+                          + "key: \"test2.key\"\n"
+                          + "gpg key fingerprint is: 3367 1532 095F 91C5 CB26  7B35 882B FD6B 87CF C5E9\n"
+                          + "    Subkey fingerprint: 8009 438D 951F 67A7 7F06  8BD3 E75D F9C2 35EC 0676\n"
+                          + "    Subkey fingerprint: 818B 5C43 34EB E280 A3CB  D285 3810 BDA9 2FCB 61B2\n"
+                          + "\ta (a) <a@a.com>\n"
+                          + "Trusting \"test.key\" for prefix \"example.com/foo\" without fingerprint review.\n"
+                          + "Added key for prefix \"example.com/foo\" at \"/etc/rkt/trustedkeys/prefix.d/example.com/bar/33671532095f91c5cb267b35882bfd6b87cfc5e9\"";
+    final TrustOutput trustOutput = trust.parse(output);
+    assertEquals(2, trustOutput.trustedPubkeys().size());
+    assertEquals("example.com/foo", trustOutput.trustedPubkeys().get(0).prefix());
+    assertEquals("test1.key", trustOutput.trustedPubkeys().get(0).key());
+    assertEquals(
+        "/etc/rkt/trustedkeys/prefix.d/example.com/foo/33671532095f91c5cb267b35882bfd6b87cfc5e9",
+        trustOutput.trustedPubkeys().get(0).location());
+    assertEquals("example.com/bar", trustOutput.trustedPubkeys().get(1).prefix());
+    assertEquals("test2.key", trustOutput.trustedPubkeys().get(1).key());
+    assertEquals(
+        "/etc/rkt/trustedkeys/prefix.d/example.com/bar/33671532095f91c5cb267b35882bfd6b87cfc5e9",
+        trustOutput.trustedPubkeys().get(1).location());
   }
 
   @Test(expected = RktUnexpectedOutputException.class)
