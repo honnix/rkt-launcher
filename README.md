@@ -5,7 +5,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/io.honnix/rkt-launcher.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22io.honnix%22%20rkt-launcher)
 [![License](https://img.shields.io/github/license/honnix/rkt-launcher.svg)](LICENSE)
 
-To launch [rkt] remotely in a type-safe way.
+To launch [rkt] in a type-safe way using Java (a.k.a rkt Java API).
 
 `rkt` is designed to be used as a command line executable without having
 a daemon. To understand the design philosophy, you are encouraged to read
